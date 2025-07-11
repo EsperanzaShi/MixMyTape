@@ -22,6 +22,13 @@ const App = () => {
   const [status, setStatus] = useState("");
   const [mixtapeUrl, setMixtapeUrl] = useState(null);
   const [camera, setCamera] = useState(undefined);
+  
+  // Instrument classification states
+  const [activeTab, setActiveTab] = useState("remix"); // "remix" or "classify"
+  const [classifyFile, setClassifyFile] = useState(null);
+  const [classificationResults, setClassificationResults] = useState(null);
+  const [isClassifying, setIsClassifying] = useState(false);
+  const [windowDuration, setWindowDuration] = useState(3.0);
 
   useEffect(() => {
     fetch("/data/umap_embeddings.json")
@@ -78,6 +85,45 @@ const App = () => {
       setStatus("Hiphop track encoded. Select a sample to remix.");
     } else {
       setStatus("Encoding failed.");
+    }
+  };
+
+  // Handle instrument classification file upload
+  const handleClassifyFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    setClassifyFile(file);
+    setClassificationResults(null);
+  };
+
+  // Run instrument classification
+  const handleClassify = async () => {
+    if (!classifyFile) return;
+    
+    setIsClassifying(true);
+    setStatus("Analyzing instruments...");
+    
+    const formData = new FormData();
+    formData.append("file", classifyFile);
+    formData.append("window_duration", windowDuration);
+    
+    try {
+      const res = await fetch("http://localhost:8000/api/classify", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setClassificationResults(data);
+        setStatus("Instrument analysis complete!");
+      } else {
+        setStatus("Classification failed.");
+      }
+    } catch (error) {
+      setStatus("Classification failed: " + error.message);
+    } finally {
+      setIsClassifying(false);
     }
   };
 
@@ -237,33 +283,149 @@ const App = () => {
 
       {/* Center: Track and Plot */}
       <div className="center-panel">
-        <h1>Track</h1>
-        <input type="file" accept="audio/*" onChange={handleAudioUpload} />
-        <Plot
-          className="plot-container"
-          data={plotData}
-          layout={{
-            width: undefined,
-            height: undefined,
-            paper_bgcolor: "rgba(0,0,0,0)",
-            plot_bgcolor: "rgba(0,0,0,0)",
-            font: { color: "#fff" },
-            scene: {
-              xaxis: { visible: false, showgrid: false, zeroline: false },
-              yaxis: { visible: false, showgrid: false, zeroline: false },
-              zaxis: { visible: false, showgrid: false, zeroline: false },
-              camera: camera || {
-                eye: { x: 1.2, y: 1.2, z: 0.7 } // Move camera closer (smaller values = closer)
-              },
-            },
-            autosize: true,
-            margin: { t: 30, r: 0, l: 0, b: 0 },
-          }}
-          useResizeHandler={true}
-          style={{width: '100%', height: '100%'}}
-          onClick={handleClickPoint}
-          onRelayout={handleRelayout}
-        />
+        {/* Tab Navigation */}
+        <div className="tab-navigation">
+          <button 
+            className={`tab-button ${activeTab === "remix" ? "active" : ""}`}
+            onClick={() => setActiveTab("remix")}
+          >
+            Remix
+          </button>
+          <button 
+            className={`tab-button ${activeTab === "classify" ? "active" : ""}`}
+            onClick={() => setActiveTab("classify")}
+          >
+            Classify
+          </button>
+        </div>
+
+        {activeTab === "remix" ? (
+          <>
+            <h1>Track</h1>
+            <input type="file" accept="audio/*" onChange={handleAudioUpload} />
+            <Plot
+              className="plot-container"
+              data={plotData}
+              layout={{
+                width: undefined,
+                height: undefined,
+                paper_bgcolor: "rgba(0,0,0,0)",
+                plot_bgcolor: "rgba(0,0,0,0)",
+                font: { color: "#fff" },
+                scene: {
+                  xaxis: { visible: false, showgrid: false, zeroline: false },
+                  yaxis: { visible: false, showgrid: false, zeroline: false },
+                  zaxis: { visible: false, showgrid: false, zeroline: false },
+                  camera: camera || {
+                    eye: { x: 1.2, y: 1.2, z: 0.7 } // Move camera closer (smaller values = closer)
+                  },
+                },
+                autosize: true,
+                margin: { t: 30, r: 0, l: 0, b: 0 },
+              }}
+              useResizeHandler={true}
+              style={{width: '100%', height: '100%'}}
+              onClick={handleClickPoint}
+              onRelayout={handleRelayout}
+            />
+          </>
+        ) : (
+          <div className="classify-panel">
+            <h1>Instrument Classifier</h1>
+            
+            {/* File Upload */}
+            <div className="upload-section">
+              <input 
+                type="file" 
+                accept="audio/*" 
+                onChange={handleClassifyFileUpload}
+                className="classify-file-input"
+              />
+              {classifyFile && (
+                <div className="file-info">
+                  <p>Selected: {classifyFile.name}</p>
+                  <audio controls src={URL.createObjectURL(classifyFile)} />
+                </div>
+              )}
+            </div>
+
+            {/* Settings */}
+            <div className="settings-section">
+              <label>
+                Window Duration: {windowDuration}s
+                <input
+                  type="range"
+                  min={1.0}
+                  max={5.0}
+                  step={0.5}
+                  value={windowDuration}
+                  onChange={(e) => setWindowDuration(parseFloat(e.target.value))}
+                  className="window-slider"
+                />
+              </label>
+            </div>
+
+            {/* Analysis Button */}
+            <button 
+              onClick={handleClassify}
+              disabled={!classifyFile || isClassifying}
+              className="classify-button"
+            >
+              {isClassifying ? "Analyzing..." : "Start Analysis"}
+            </button>
+
+            {/* Results */}
+            {classificationResults && (
+              <div className="results-section">
+                <h2>Analysis Results</h2>
+                
+                {/* Summary */}
+                <div className="summary-grid">
+                  <div className="summary-item">
+                    <h3>Most Common</h3>
+                    <p>{classificationResults.summary.most_common_instrument_name}</p>
+                  </div>
+                  <div className="summary-item">
+                    <h3>Avg Confidence</h3>
+                    <p>{(classificationResults.summary.average_confidence * 100).toFixed(1)}%</p>
+                  </div>
+                  <div className="summary-item">
+                    <h3>Total Windows</h3>
+                    <p>{classificationResults.summary.total_windows}</p>
+                  </div>
+                </div>
+
+                {/* Detailed Results */}
+                <div className="results-table">
+                  <h3>Time-Window Analysis</h3>
+                  <div className="table-container">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Window</th>
+                          <th>Time</th>
+                          <th>Instrument</th>
+                          <th>Confidence</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {classificationResults.results.map((result, index) => (
+                          <tr key={index}>
+                            <td>{result.window}</td>
+                            <td>{result.start_time.toFixed(1)}s - {result.end_time.toFixed(1)}s</td>
+                            <td>{result.instrument_name}</td>
+                            <td>{(result.confidence * 100).toFixed(1)}%</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Status/logs overlay */}
         {status && (
           <div className="status-bottom">

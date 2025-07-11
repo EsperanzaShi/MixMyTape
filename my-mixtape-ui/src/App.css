@@ -319,3 +319,272 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+/* Tab Navigation Styles */
+.tab-navigation {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  width: 100%;
+  justify-content: center;
+}
+
+.tab-button {
+  background: rgba(0,0,0,0.7);
+  border: 2px solid #fff;
+  color: #fff;
+  padding: 15px 30px;
+  font-size: 2.4rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+
+.tab-button:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.tab-button.active {
+  background: #fff;
+  color: #000;
+}
+
+/* Classification Panel Styles */
+.classify-panel {
+  width: 100%;
+  max-width: 800px;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.upload-section {
+  width: 100%;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.classify-file-input {
+  margin-bottom: 20px;
+}
+
+.file-info {
+  background: rgba(0,0,0,0.7);
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 15px;
+}
+
+.file-info p {
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+}
+
+.file-info audio {
+  width: 100%;
+  max-width: 400px;
+}
+
+.settings-section {
+  width: 100%;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.settings-section label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 2rem;
+  gap: 10px;
+}
+
+.window-slider {
+  width: 300px;
+  height: 20px;
+  margin-top: 10px;
+}
+
+.window-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 100%;
+  background: #8B0000;
+  border: 2px solid #8B0000;
+  cursor: pointer;
+}
+
+.window-slider::-webkit-slider-runnable-track {
+  height: 8px;
+  background: #fff;
+  border-radius: 4px;
+}
+
+.classify-button {
+  background: #8B0000;
+  border: 2px solid #8B0000;
+  color: #fff;
+  padding: 15px 30px;
+  font-size: 2rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 30px;
+}
+
+.classify-button:hover:not(:disabled) {
+  background: #a00000;
+  border-color: #a00000;
+}
+
+.classify-button:disabled {
+  background: #666;
+  border-color: #666;
+  cursor: not-allowed;
+}
+
+/* Results Section Styles */
+.results-section {
+  width: 100%;
+  background: rgba(0,0,0,0.7);
+  border-radius: 15px;
+  padding: 30px;
+  margin-top: 20px;
+}
+
+.results-section h2 {
+  font-size: 4rem;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.results-section h3 {
+  font-size: 2.8rem;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.summary-item {
+  background: rgba(255,255,255,0.1);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.summary-item h3 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  color: #ccc;
+}
+
+.summary-item p {
+  font-size: 2.4rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.results-table {
+  width: 100%;
+}
+
+.table-container {
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1.6rem;
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+th {
+  background: rgba(255,255,255,0.1);
+  font-weight: bold;
+  color: #fff;
+  position: sticky;
+  top: 0;
+}
+
+td {
+  color: #ccc;
+}
+
+tr:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .tab-navigation {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .tab-button {
+    font-size: 2rem;
+    padding: 12px 20px;
+  }
+  
+  .classify-panel {
+    padding: 0 10px;
+  }
+  
+  .results-section {
+    padding: 20px;
+  }
+  
+  .results-section h2 {
+    font-size: 3rem;
+  }
+  
+  .results-section h3 {
+    font-size: 2.2rem;
+  }
+  
+  .summary-item h3 {
+    font-size: 1.6rem;
+  }
+  
+  .summary-item p {
+    font-size: 2rem;
+  }
+  
+  table {
+    font-size: 1.4rem;
+  }
+  
+  th, td {
+    padding: 8px 10px;
+  }
+}

@@ -1,70 +1,86 @@
-# Getting Started with Create React App
+# MixMyTape UI
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A React-based web interface for audio remixing and instrument classification.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+### Remix Mode
+- Upload hiphop tracks and find similar samples in the 3D visualization
+- Generate remixes using different modes: interleave, blend, and average
+- Interactive 3D plot with genre filtering and Top-N recommendations
 
-### `npm start`
+### Instrument Classification Mode
+- Upload audio files for real-time instrument classification
+- Time-window analysis with configurable window duration (1-5 seconds)
+- Detailed results showing instrument detection over time
+- Support for 11 instrument types: Cello, Clarinet, Flute, Acoustic Guitar, Electric Guitar, Organ, Piano, Saxophone, Trumpet, Violin, and Voice
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Installation
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+1. Install dependencies:
+```bash
+npm install
+```
 
-### `npm test`
+2. Make sure the backend server is running (see main README.md for backend setup)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Running the Application
 
-### `npm run build`
+Start the development server:
+```bash
+npm start
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The app will open at `http://localhost:3000`
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Usage
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Remix Mode
+1. Click the "Remix" tab
+2. Upload a hiphop audio file
+3. Use genre checkboxes to filter samples
+4. Adjust the Top-N slider to see more/less similar points
+5. Click on red points to preview audio
+6. Select a sample and choose a remix mode
+7. Generate and download your mixtape
 
-### `npm run eject`
+### Classification Mode
+1. Click the "Classify" tab
+2. Upload an audio file (WAV, MP3, FLAC, etc.)
+3. Adjust the window duration slider (1-5 seconds)
+4. Click "Start Analysis" to begin classification
+5. View results including:
+   - Most common instrument detected
+   - Average confidence score
+   - Total number of time windows analyzed
+   - Detailed time-window breakdown table
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Backend Requirements
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The frontend requires the FastAPI backend to be running on `http://localhost:8000` with the following endpoints:
+- `POST /api/encode` - Encode audio to latent vectors
+- `POST /api/remix` - Generate remixes
+- `POST /api/classify` - Classify instruments in audio
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Technical Details
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- Built with React 19
+- Uses Plotly.js for 3D visualization
+- Responsive design with mobile support
+- Real-time audio analysis with time-window processing
+- Instrument classification using CNN models trained on IRMAS dataset
 
-## Learn More
+## File Structure
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```
+src/
+├── App.js          # Main application component
+├── App.css         # Styles for the application
+└── index.js        # Application entry point
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Troubleshooting
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- If the backend connection fails, ensure the FastAPI server is running on port 8000
+- For classification issues, check that the `cnn_gen.pt` model file is present in the backend directory
+- Audio file upload issues may be related to CORS settings in the backend

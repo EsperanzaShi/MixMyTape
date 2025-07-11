@@ -2,10 +2,12 @@ from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 import torch
+import torchaudio
 import librosa
 import tempfile
 import os
 from autoencoder import Autoencoder
+from cnn_gen import SimpleCNN, LABEL_MAP, INV_LABEL_MAP, select_device
 from fastapi.responses import FileResponse, JSONResponse
 import glob
 
@@ -27,11 +29,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load model at startup
+# Load models at startup
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 autoencoder = Autoencoder(latent_dim=LATENT_DIM, n_mels=N_MELS).to(device)
 autoencoder.load_state_dict(torch.load(AUTOENCODER_CKPT, map_location=device))
 autoencoder.eval()
+
+# Load instrument classification model
+instrument_device = select_device()
+instrument_model = SimpleCNN(len(LABEL_MAP)).to(instrument_device)
+instrument_model.load_state_dict(torch.load("cnn_gen.pt", map_location=instrument_device))
+instrument_model.eval()
+
+# Instrument names mapping
+INSTRUMENT_NAMES = {
+    "cel": "🎻 Cello",
+    "cla": "🎵 Clarinet", 
+    "flu": "🎶 Flute",
+    "gac": "🎸 Acoustic Guitar",
+    "gel": "🎸 Electric Guitar",
+    "org": "🎹 Organ",
+    "pia": "🎹 Piano",
+    "sax": "🎷 Saxophone",
+    "tru": "🎺 Trumpet",
+    "vio": "🎻 Violin",
+    "voi": "🎤 Voice"
+}
 
 def chunk_to_logmel(y, sr=SR, n_mels=N_MELS, chunk_duration=CHUNK_DURATION):
     mel = librosa.feature.melspectrogram(
@@ -56,6 +79,46 @@ def pad_or_crop_mel(mel, target_shape=(1, 80, 129)):
     elif h > th:
         mel = mel[:, :th, :]
     return mel
+
+class StreamingClassifier:
+    def __init__(self, model, device, window_duration=3.0, sr=16000):
+        self.model = model
+        self.device = device
+        self.window_duration = window_duration
+        self.sr = sr
+        self.samples_per_window = int(sr * window_duration)
+        self.mel_transform = torchaudio.transforms.MelSpectrogram(
+            sample_rate=sr, n_mels=128, n_fft=2048, hop_length=512
+        )
+        
+    def preprocess_audio_segment(self, audio_segment):
+        if len(audio_segment) < self.samples_per_window:
+            audio_segment = np.pad(audio_segment, (0, self.samples_per_window - len(audio_segment)))
+        elif len(audio_segment) > self.samples_per_window:
+            audio_segment = audio_segment[:self.samples_per_window]
+        
+        waveform = torch.tensor(audio_segment, dtype=torch.float32).unsqueeze(0)
+        mel_spec = self.mel_transform(waveform)
+        mel_spec = torch.log2(mel_spec + 1e-8)
+        mel_spec = (mel_spec - mel_spec.mean()) / (mel_spec.std() + 1e-6)
+        return mel_spec.unsqueeze(0)
+    
+    def predict_instrument(self, audio_segment):
+        try:
+            mel_spec = self.preprocess_audio_segment(audio_segment)
+            mel_spec = mel_spec.to(self.device)
+            
+            with torch.no_grad():
+                logits = self.model(mel_spec)
+                probabilities = torch.softmax(logits, dim=1)
+                pred_idx = logits.argmax(dim=1).item()
+                confidence = probabilities.max(dim=1)[0].item()
+                pred_label = INV_LABEL_MAP[pred_idx]
+                all_probs = probabilities.cpu().numpy()[0]
+                
+            return pred_label, confidence, all_probs
+        except Exception as e:
+            return "Error", 0.0, np.zeros(len(LABEL_MAP))
 
 @app.post("/api/encode")
 async def encode_audio(file: UploadFile = File(...)):
@@ -86,6 +149,79 @@ async def encode_audio(file: UploadFile = File(...)):
         z_np = z.cpu().numpy().flatten()  # (latent_dim,)
 
     return {"latent": z_np.tolist()}
+
+@app.post("/api/classify")
+async def classify_instruments(
+    file: UploadFile = File(...),
+    window_duration: float = Form(3.0)
+):
+    """Classify instruments in audio file with time-window analysis"""
+    
+    # Save uploaded file to a temp file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        tmp.write(await file.read())
+        temp_path = tmp.name
+    
+    try:
+        # Load audio
+        audio_data, sr = librosa.load(temp_path, sr=16000, mono=True)
+        os.remove(temp_path)
+        
+        # Initialize classifier
+        classifier = StreamingClassifier(instrument_model, instrument_device, window_duration)
+        
+        # Analyze in windows
+        total_duration = len(audio_data) / classifier.sr
+        num_windows = int(total_duration / window_duration)
+        results = []
+        
+        for i in range(num_windows):
+            start_sample = i * classifier.samples_per_window
+            end_sample = start_sample + classifier.samples_per_window
+            
+            if end_sample > len(audio_data):
+                break
+            
+            window = audio_data[start_sample:end_sample]
+            pred_label, confidence, all_probs = classifier.predict_instrument(window)
+            
+            start_time = i * window_duration
+            end_time = (i + 1) * window_duration
+            
+            result = {
+                "window": i + 1,
+                "start_time": start_time,
+                "end_time": end_time,
+                "instrument": pred_label,
+                "instrument_name": INSTRUMENT_NAMES.get(pred_label, pred_label.upper()),
+                "confidence": confidence,
+                "probabilities": all_probs.tolist()
+            }
+            
+            results.append(result)
+        
+        # Calculate summary statistics
+        instruments = [r["instrument"] for r in results]
+        most_common = max(set(instruments), key=instruments.count) if instruments else "unknown"
+        avg_confidence = np.mean([r["confidence"] for r in results]) if results else 0.0
+        
+        summary = {
+            "most_common_instrument": most_common,
+            "most_common_instrument_name": INSTRUMENT_NAMES.get(most_common, most_common.upper()),
+            "average_confidence": avg_confidence,
+            "total_windows": len(results),
+            "total_duration": total_duration
+        }
+        
+        return {
+            "summary": summary,
+            "results": results
+        }
+        
+    except Exception as e:
+        if "temp_path" in locals():
+            os.remove(temp_path)
+        return JSONResponse(status_code=500, content={"error": str(e)})
 
 @app.post("/api/remix")
 async def remix_audio(
