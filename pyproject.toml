@@ -20,4 +20,9 @@ dependencies = [
     "tqdm",
     "plotly",
     "pandas",
+    "npm>=0.1.1",
+    "pynput>=1.8.1",
+    "pyautogui>=0.9.54",
+    "sounddevice>=0.5.2",
+    "openai-whisper>=20250625",
 ]
