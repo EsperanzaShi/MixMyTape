@@ -1,0 +1,321 @@
+body, html, .app {
+  background-color: #0e0e0e;
+  color: #ffffff;
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  background: linear-gradient(to bottom, #d3d3d3 0%, #111 30% 100%);
+}
+
+.sidebar {
+  flex: 0 0 520px;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  padding: 40px 20px 20px 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: 3rem;
+  min-width: 440px;
+  height: 100vh;
+  border-right: 1px solid #333;
+}
+
+/* Genre filter checkboxes: square, white outline, minimal */
+.sidebar input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid #fff;
+  border-radius: 4px;
+  background: transparent;
+  margin-right: 18px;
+  vertical-align: middle;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  transition: border 0.2s;
+}
+.sidebar input[type="checkbox"]:checked {
+  background: #fff;
+}
+.sidebar input[type="checkbox"]:checked:after {
+  content: '';
+  display: block;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  border-radius: 2px;
+}
+
+.sidebar label {
+  font-size: 2.6rem;
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+
+/* Top-N slider and number input minimal style */
+.sidebar .topn-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  margin-top: 2.5rem;
+  margin-bottom: 2.5rem;
+  width: 100%;
+}
+
+.sidebar .topn-label {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: #fff;
+}
+
+.topn-value {
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: #fff;
+  margin: 0 0.3rem;
+}
+
+input[type="range"].horizontal-slider {
+  width: 400px;
+  height: 32px;
+  margin-top: 0.5rem;
+  accent-color: initial;
+  background: transparent;
+  border-radius: 8px;
+  outline: none;
+  box-shadow: none;
+  display: block;
+}
+
+/* Webkit (Chrome, Safari) */
+input[type="range"].horizontal-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 60px;
+  height: 60px;
+  border-radius: 100%;
+  background: #8B0000 !important;
+  border: 2.5px solid #8B0000 !important;
+  cursor: pointer;
+  box-shadow: none;
+  margin-top: -11px;
+}
+
+/* Firefox */
+input[type="range"].horizontal-slider::-moz-range-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 100%;
+  background: #8B0000 !important;
+  border: 2.5px solid #8B0000 !important;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+/* IE/Edge */
+input[type="range"].horizontal-slider::-ms-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 100%;
+  background: #8B0000 !important;
+  border: 2.5px solid #8B0000 !important;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+input[type="range"].horizontal-slider::-webkit-slider-runnable-track {
+  height: 10px;
+  background: #fff;
+  border-radius: 5px;
+}
+
+input[type="range"].horizontal-slider:focus {
+  outline: none;
+}
+
+input[type="range"].horizontal-slider::-moz-range-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 100%;
+  background: #8B0000;
+  border: 2.5px solid #8B0000;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+input[type="range"].horizontal-slider::-ms-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 100%;
+  background: #8B0000;
+  border: 2.5px solid #8B0000;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+input[type="range"].horizontal-slider::-ms-fill-lower,
+input[type="range"].horizontal-slider::-ms-fill-upper {
+  background: #fff;
+}
+
+input[type="range"].horizontal-slider:focus::-webkit-slider-thumb {
+  outline: none;
+}
+
+.sidebar input[type="number"] {
+  width: 48px;
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid #fff;
+  border-radius: 4px;
+  font-size: 1.5rem;
+  text-align: center;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  outline: none;
+  box-shadow: none;
+}
+
+.center-panel {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 40px;
+  position: relative;
+  background: none;
+  height: 100vh;
+  width: 100%;
+}
+
+.plot-container {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  max-height: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin: 0;
+  background: none;
+}
+
+/* Remove axis/grid styling from plotly */
+/* You may need to set these in the Plotly layout in App.js as well, but this will help for container */
+
+h1, h2 {
+  font-size: 6rem;
+  font-weight: 400;
+  margin: 0 0 1.5rem 0;
+  letter-spacing: 2px;
+}
+
+button {
+  margin: 10px 0 0 0;
+  background: #222;
+  border: 1.5px solid #aaa;
+  color: #fff;
+  padding: 8px 18px;
+  font-size: 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+button:active, button.selected {
+  background: #fff;
+  color: #222;
+}
+
+input[type="file"] {
+  margin: 10px 0 20px 0;
+  font-size: 2.2rem;
+}
+
+input[type="range"].slider {
+  width: 120px;
+  margin: 10px 0 20px 0;
+  accent-color: #aa1801;
+}
+
+.status-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(30,30,30,0.95);
+  color: #fff;
+  padding: 2rem 3rem;
+  border-radius: 18px;
+  font-size: 1.5rem;
+  z-index: 100;
+  text-align: center;
+  box-shadow: 0 4px 32px 0 rgba(0,0,0,0.4);
+}
+
+.status-bottom {
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  background: rgba(30,30,30,0.95);
+  color: #fff;
+  padding: 1.2rem 2rem;
+  border-radius: 14px;
+  font-size: 1.2rem;
+  z-index: 100;
+  text-align: center;
+  box-shadow: 0 4px 32px 0 rgba(0,0,0,0.4);
+}
+
+.sidebar .topn-value-label {
+  font-size: 2.2rem;
+  color: #fff;
+  margin-top: 0.5rem;
+  text-align: center;
+  width: 100%;
+}
+
+label {
+  font-size: 2.6rem;
+  margin-bottom: 0.7rem;
+  display: flex;
+  align-items: center;
+}
+
+.remix-selected-sample {
+  font-size: 2.2rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Hide number input arrows for Top-N */
+input[type="number"]::-webkit-inner-spin-button, 
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}

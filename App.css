@@ -1,0 +1,36 @@
+body, html, .app {
+    background-color: #0e0e0e;
+    color: #ffffff;
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  .sidebar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10;
+    width: 220px;
+    height: 100%;
+    overflow-y: auto;
+    border-right: 1px solid #333;
+  }
+  
+  button {
+    margin-top: 10px;
+    background: #222;
+    border: 1px solid #555;
+    color: #fff;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  input[type="number"] {
+    width: 60px;
+    margin-bottom: 5px;
+    background: #111;
+    color: #fff;
+    border: 1px solid #555;
+  }

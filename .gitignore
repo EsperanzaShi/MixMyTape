@@ -1,0 +1,6 @@
+*.wav
+*.mp3
+.DS_Store
+.pth
+.pt
+.npy

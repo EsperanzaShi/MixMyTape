@@ -1,0 +1,23 @@
+[project]
+name = "audioml"
+version = "0.1.0"
+description = "AI-assisted music remix and mixtape web app using deep learning, UMAP, and React UI"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "numpy",
+    "torch",
+    "librosa",
+    "soundfile",
+    "matplotlib",
+    "scipy",
+    "scikit-learn",
+    "python-multipart>=0.0.20",
+    "umap-learn",
+    "wandb",
+    "tqdm",
+    "plotly",
+    "pandas",
+]
