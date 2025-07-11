@@ -25,4 +25,6 @@ dependencies = [
     "pyautogui>=0.9.54",
     "sounddevice>=0.5.2",
     "openai-whisper>=20250625",
+    "streamlit>=1.46.1",
+    "torchaudio>=2.7.1",
 ]
