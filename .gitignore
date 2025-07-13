@@ -4,3 +4,16 @@
 .pth
 .pt
 .npy
+*.pth
+*.pt
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pywz
+*.pyzw
+*.pyzwz
+__pycache__
+
+*/UNIVERSAL_V1
